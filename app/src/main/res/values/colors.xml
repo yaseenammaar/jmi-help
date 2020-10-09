@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#ffdc51</color>
+    <color name="colorPrimaryDark">#ffdc51</color>
+    <color name="colorAccent">#ffdc51</color>
+    <color name="iconBackground">#ffdc51</color>
+</resources>

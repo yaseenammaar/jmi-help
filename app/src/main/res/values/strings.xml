@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">JMI Help</string>
+    <string name="app_name1">ECC</string>
+    <string name="app_name2">JMI Help</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">EeduHub</string>
+    <string name="nav_header_subtitle">For Positive Learning</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_back">Back</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_copy">Copy Link</string>
+    <string name="storage_manifest">Storage permission is required.</string>
+    <string name="storage_manifest_title">Please give me permission.</string>
+    <string name="download_info">Downloading.</string>
+    <string name="about_title">You are Offline Page.</string>
+    <string name="about_content">Make sure you are connected to network and refresh</string>
+    <string name="action_settings">Settings</string>
+</resources>

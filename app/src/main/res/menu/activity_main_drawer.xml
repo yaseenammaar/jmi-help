@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <item android:checkableBehavior="single"
+        android:title="Menu">
+        <menu>
+        <item
+            android:id="@+id/home"
+            android:icon="@drawable/building"
+            android:title="Home" />
+
+            <item
+                android:id="@+id/notice"
+                android:icon="@drawable/notice"
+                android:title="Notice Board" />
+
+            <item
+                android:id="@+id/blog"
+                android:icon="@drawable/blog"
+                android:title="Blog" />
+
+        <item
+            android:id="@+id/classroom"
+            android:icon="@drawable/lapclass"
+            android:title="Classroom" />
+            <item
+                android:id="@+id/courses"
+                android:icon="@drawable/couses"
+                android:title="Courses" />
+        <item
+            android:id="@+id/studyhelp"
+            android:icon="@drawable/help"
+            android:title="Study-Help" />
+            <item
+                android:id="@+id/etest"
+                android:icon="@drawable/etest"
+                android:title="E-test" />
+            <item
+                android:id="@+id/QnA"
+                android:icon="@drawable/qna"
+                android:title="QnA" />
+
+        </menu>
+    </item>
+    <item
+        android:title="More">
+        <menu>
+
+            <item
+                android:id="@+id/events"
+                android:icon="@drawable/event"
+                android:title="Events"/>
+
+            <item
+                android:id="@+id/bookmarket"
+                android:icon="@drawable/bookm"
+                android:title="Book Market"/>
+
+            <item
+                android:id="@+id/placement"
+                android:icon="@drawable/placement"
+                android:title="Placement"/>
+        <item
+            android:id="@+id/contact"
+            android:icon="@drawable/contact"
+            android:title="Contact Us"/>
+    </menu>
+</item>
+
+</menu>

@@ -47,12 +47,19 @@
             </androidx.core.widget.NestedScrollView>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeContainer1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
     <WebView
         android:layout_marginTop="55dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/mWebView">
     </WebView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
             android:id="@+id/adView"

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.os.Environment;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,6 +40,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -73,7 +77,7 @@ public class MainActivity extends AppCompatActivity
 
     private ValueCallback<Uri> mUploadMessage;
     public ValueCallback<Uri[]> uploadMessage;
-    public static final int REQUEST_SELECT_FILE = 100;
+    public static final int REQUEST_SELECT_FILE = 101;
     private final static int FILECHOOSER_RESULTCODE = 1;
     private SwipeRefreshLayout mySwipeRefreshLayout;
     private View mCustomView;
@@ -88,6 +92,8 @@ public class MainActivity extends AppCompatActivity
     final String admob_banner_id = "ca-app-pub-3940256099942544/6300978111";
     final String admob_inter_id = "ca-app-pub-3940256099942544/1033173712";
     FrameLayout frameLayout;
+
+    private static final int PERMISSION_REQUEST_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +119,59 @@ public class MainActivity extends AppCompatActivity
 
         webSettings();
 
+        if(getIntent().getExtras() != null) {
+            Bundle extras = getIntent().getExtras();
+            mWebView.loadUrl(extras.getString("data"));
+
+        }
+
 
         //setRTL();
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (checkPermission()) {
+
+                } else {
+                    requestPermission(); // Code for permission
+                }
+            } else {
+
+            }
+        }
+
+
+    }
+
+
+    private boolean checkPermission() {
+        int result = ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void requestPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            Toast.makeText(MainActivity.this, "Write External Storage permission allows us to save files. Please allow this permission in App Settings.", Toast.LENGTH_LONG).show();
+        } else {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.e("value", "Permission Granted, Now you can use local drive .");
+            } else {
+                Log.e("value", "Permission Denied, You cannot use local drive .");
+            }
+            break;
+        }
     }
 
     void setRTL(){
@@ -128,7 +185,7 @@ public class MainActivity extends AppCompatActivity
 
 
     final void setMySwipeRefreshLayout(){
-        mySwipeRefreshLayout = findViewById(R.id.swipeContainer);
+        mySwipeRefreshLayout = findViewById(R.id.swipeContainer1);
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
@@ -180,7 +237,17 @@ public class MainActivity extends AppCompatActivity
         nestedScrollView = findViewById(R.id.nested);
     }
 
-     void webSettings(){
+    ProgressDialog pd;
+
+
+    void webSettings(){
+        pd = ProgressDialog.show(this, "", "Loading...",true);
+
+
+
+
+
+
         mWebView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDescription,
@@ -206,6 +273,7 @@ public class MainActivity extends AppCompatActivity
         mWebView.setWebViewClient(new WebViewClient()
         {
 
+
             public void onReceivedError(WebView mWebView, int i, String s, String d1)
             {
                 mWebView.loadUrl("file:///android_asset/net_error.html");
@@ -224,6 +292,11 @@ public class MainActivity extends AppCompatActivity
                     nestedScrollView.scrollTo(0,0);
                     d=true;
                 }
+
+                if(pd!=null && pd.isShowing())
+                {
+                    pd.dismiss();
+                }
             }
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -234,6 +307,12 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     view.setWebViewClient(new WebViewClient());
                 }*/
+                if (url.endsWith(".pdf")) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    // if want to download pdf manually create AsyncTask here
+                    // and download file
+                    return true;
+                }
 
                 if(url.contains("youtube.com") || url.contains("play.google.com") || url.contains("google.com/maps") || url.contains("facebook.com") || url.contains("twitter.com") || url.contains("instagram.com")){
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -637,80 +716,100 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
+
+        Intent intent = new Intent(MainActivity.this, MainActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt("key", 1);
         int id = item.getItemId();
 
         if (id == R.id.contact) {
-            fragment = null;
-
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-
-            mWebView.loadUrl("https://gurucool.xyz/messages/102");
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+//
+//            mWebView.loadUrl("https://gurucool.xyz/messages/102");
+            bundle.putString("data", "https://gurucool.xyz/messages/102");
         } else if (id == R.id.home) {
-            fragment = null;
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+//            mWebView.loadUrl(url);
 
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-            mWebView.loadUrl(url);
+            bundle.putString("data", url);
 
         } else if (id == R.id.blog) {
-            fragment = null;
-
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-//            mWebView.loadUrl("https://gurucool.xyz/eeduhub#about");
-//            mWebView.loadUrl("https://gurucool.xyz/alnajahinstitute");
-            mWebView.loadUrl("https://gurucool.xyz/blogs");
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+////            mWebView.loadUrl("https://gurucool.xyz/eeduhub#about");
+////            mWebView.loadUrl("https://gurucool.xyz/alnajahinstitute");
+//            mWebView.loadUrl("https://gurucool.xyz/blogs");
+            bundle.putString("data", "https://gurucool.xyz/blogs");
 
         }  else if (id == R.id.bookmarket) {
-            fragment = null;
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+////            mWebView.loadUrl("https://gurucool.xyz/eeduhub#about");
+////            mWebView.loadUrl("https://gurucool.xyz/alnajahinstitute");
+//            mWebView.loadUrl("https://gurucool.xyz/products");
 
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-//            mWebView.loadUrl("https://gurucool.xyz/eeduhub#about");
-//            mWebView.loadUrl("https://gurucool.xyz/alnajahinstitute");
-            mWebView.loadUrl("https://gurucool.xyz/products");
+            bundle.putString("data", "https://gurucool.xyz/products");
 
         }  else if (id == R.id.notice) {
-            fragment = null;
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+////            mWebView.loadUrl("https://gurucool.xyz/eeduhub#about");
+////            mWebView.loadUrl("https://gurucool.xyz/alnajahinstitute");
+//            mWebView.loadUrl("https://www.jmi.ac.in/bulletinboard/NoticeOfficialorder/latest/1");
 
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-//            mWebView.loadUrl("https://gurucool.xyz/eeduhub#about");
-//            mWebView.loadUrl("https://gurucool.xyz/alnajahinstitute");
-            mWebView.loadUrl("https://www.jmi.ac.in/bulletinboard/NoticeOfficialorder/latest/1");
+            bundle.putString("data", "https://www.jmi.ac.in/bulletinboard/NoticeOfficialorder/latest/1");
 
         }else if (id == R.id.classroom) {
-            fragment = null;
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+//            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=classroompro&id=102");
 
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=classroompro&id=102");
+            bundle.putString("data", "https://gurucool.xyz/index.php?link1=classroompro&id=102");
 
         } else if (id == R.id.courses) {
-            fragment = null;
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+////            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=educatormode&id=110");
+//            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=educatormode&id=102");
 
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-//            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=educatormode&id=110");
-            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=educatormode&id=102");
+            bundle.putString("data", "https://gurucool.xyz/index.php?link1=educatormode&id=102");
 
         } else if (id == R.id.studyhelp) {
-            fragment = null;
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+////            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=studyhelpl");
+////            mWebView.loadUrl("https://gurucool.xyz/");
+//            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=studyhelppro&id=102");
 
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-//            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=studyhelpl");
-//            mWebView.loadUrl("https://gurucool.xyz/");
-            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=studyhelppro&id=102");
+            bundle.putString("data", "https://gurucool.xyz/index.php?link1=studyhelppro&id=102");
 
         } else if (id == R.id.etest) {
-            fragment = null;
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+////            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=e_test");
+//            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=testpro&id=102");
 
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-//            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=e_test");
-            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=testpro&id=102");
+            bundle.putString("data", "https://gurucool.xyz/index.php?link1=testpro&id=102");
 //            try {
 //                String s = "154";
 //
@@ -722,33 +821,55 @@ public class MainActivity extends AppCompatActivity
 //            }
 
         } else if (id == R.id.QnA) {
-            fragment = null;
-
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+////            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=discussion");
 //            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=discussion");
-            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=discussion");
+
+            bundle.putString("data", "https://gurucool.xyz/index.php?link1=discussion");
 
         } else if (id == R.id.placement) {
-            fragment = null;
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+//
+////            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=classroom");
+//            mWebView.loadUrl("https://gurucool.xyz/jobs");
+//            Toast.makeText(this, "This feature is under development", Toast.LENGTH_SHORT).sho
+//
+//            w();
 
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-
-//            mWebView.loadUrl("https://gurucool.xyz/index.php?link1=classroom");
-            mWebView.loadUrl("https://gurucool.xyz/jobs");
-//            Toast.makeText(this, "This feature is under development", Toast.LENGTH_SHORT).show();
+            bundle.putString("data", "https://gurucool.xyz/jobs");
 
 
         } else if (id == R.id.events) {
-            fragment = null;
-
-            mWebView.setVisibility(View.VISIBLE);
-            frameLayout.setVisibility(View.GONE);
-            mWebView.loadUrl("https://gurucool.xyz/events/");
+//            fragment = null;
+//
+//            mWebView.setVisibility(View.VISIBLE);
+//            frameLayout.setVisibility(View.GONE);
+//            mWebView.loadUrl("https://gurucool.xyz/events/");
+            bundle.putString("data", "https://gurucool.xyz/events/");
 //            Toast.makeText(this, "This feature is under development", Toast.LENGTH_SHORT).show();
         }
+        intent.putExtras(bundle);
+
+        finish();
+        startActivity(intent);
+
 
         return true;
     }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_SELECT_FILE) {
+            if (uploadMessage == null) return;
+            uploadMessage.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+            uploadMessage = null;
+        }
+    }
 }
+

@@ -61,7 +61,7 @@
             <item
                 android:id="@+id/placement"
                 android:icon="@drawable/placement"
-                android:title="Placement"/>
+                android:title="Startups"/>
         <item
             android:id="@+id/contact"
             android:icon="@drawable/contact"

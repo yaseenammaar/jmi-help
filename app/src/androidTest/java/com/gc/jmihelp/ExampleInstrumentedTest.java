@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sniff Labs LLC. All rights reserved.
 package com.gc.jmihelp;
 
 import android.content.Context;
